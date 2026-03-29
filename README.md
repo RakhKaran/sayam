@@ -1,235 +1,195 @@
-# Sayam Platform
+# Sayam AI Backend
 
-> AI-powered decision visibility platform for Indian SMEs and retailers
+FastAPI-based AI service for forecasting and risk analysis.
 
-**Tagline:** See Your Future, Decide with Confidence
+## Features
 
-## Overview
+- **Decision Impact Simulation** - Compare baseline vs decision scenarios
+- **90-Day Cash Flow Projection** - Deterministic daily projections
+- **Disturbance Detection** - Identify when decision impact begins
+- **Risk Detection** - Flag when cash goes negative
+- **Graph-Ready Output** - Two projections for visualization
 
-Sayam helps Indian small business owners simulate tactical decisions (hiring, inventory purchases, store launches) before committing resources. The platform provides cash flow projections, risk alerts, and comparative analysis to transform uncertain business decisions into data-backed strategic moves.
+## Setup
+
+### 1. Create Virtual Environment
+
+```bash
+# Create venv
+python -m venv venv
+
+# Activate
+# Windows:
+venv\Scripts\activate
+
+# Mac/Linux:
+source venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run Server
+
+```bash
+# Development (with auto-reload)
+python main.py
+
+# Or using uvicorn directly
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 4. Access API
+
+- **API**: http://localhost:8000
+- **Swagger Docs**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## API Endpoints
+
+### Health Check
+```bash
+GET /
+```
+
+### Generate Forecast
+```bash
+POST /forecast
+```
+
+**Request Body:**
+```json
+{
+  "scenario_info": {
+    "scenario_type": "hiring",
+    "scenario_desc": "Hire Sales Associate"
+  },
+  "current_cash_balance": 450000,
+  "monthly_revenue": 150000,
+  "expenses": [
+    {"category": "Rent", "amount": 20000},
+    {"category": "Utilities", "amount": 5000}
+  ],
+  "decision_cost": 25000,
+  "decision_start_day": 7
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "scenario": {...},
+  "baseline_projection": [
+    {"day": 1, "cash": 454166.67},
+    {"day": 2, "cash": 458333.33},
+    ...90 days
+  ],
+  "decision_projection": [
+    {"day": 1, "cash": 454166.67},
+    {"day": 7, "cash": 429166.67},  // Decision cost applied
+    ...90 days
+  ],
+  "disturbance_day": 7,
+  "lowest_cash_point": 429166.67,
+  "lowest_cash_day": 7,
+  "risk": false
+}
+```
+
+## Testing
+
+### Manual Testing with curl
+
+```bash
+curl -X POST "http://localhost:8000/forecast" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "scenario_info": {
+      "scenario_type": "hiring",
+      "scenario_desc": "Hire Sales Associate"
+    },
+    "current_cash_balance": 450000,
+    "monthly_revenue": 150000,
+    "expenses": [
+      {"category": "Rent", "amount": 20000},
+      {"category": "Utilities", "amount": 5000}
+    ],
+    "decision_cost": 25000,
+    "decision_start_day": 7
+  }'
+```
+
+### Using Swagger UI
+
+1. Go to http://localhost:8000/docs
+2. Click on `/forecast` endpoint
+3. Click "Try it out"
+4. Edit the request body
+5. Click "Execute"
 
 ## Project Structure
 
 ```
-sayam-platform/
-├── frontend/          # React Native mobile app
-├── backend/           # Node.js/Express API server
-├── ai-backend/        # Python ML services (future)
-├── docs/              # Documentation
-├── design/            # Design assets
-├── firebase/          # Firebase configuration
-└── scripts/           # Utility scripts
+AI-Backend/
+├── main.py              # FastAPI application
+├── requirements.txt     # Python dependencies
+├── README.md           # This file
+├── venv/               # Virtual environment (gitignored)
+└── .env                # Environment variables (future)
 ```
 
-See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure.
+## Future Enhancements
 
-## Current Phase: MVP
+- [ ] Add ML models (Scikit-learn)
+- [ ] Integrate with AWS SageMaker
+- [ ] Add pattern recognition
+- [ ] Historical data analysis
+- [ ] Seasonal trend detection
+- [ ] Database integration
+- [ ] Authentication/Authorization
+- [ ] Rate limiting
+- [ ] Caching
 
-**Timeline:** 4 months  
-**Target:** 20 pilot users, 70%+ satisfaction
+## Development
 
-### MVP Features
-- ✅ Phone authentication (OTP)
-- ✅ Business profile setup
-- ✅ Hiring scenario simulation
-- ✅ Inventory purchase simulation
-- ✅ Cash flow visualization
-- ✅ Risk alerts
-- ✅ Scenario comparison
-- ✅ Hindi + English support
-- ✅ Android app
+### Add New Endpoint
 
-### Not in MVP
-- ❌ Voice interface
-- ❌ Offline capability
-- ❌ ML-powered forecasting
-- ❌ Third-party integrations
-- ❌ iOS app
+```python
+@app.post("/new-endpoint", tags=["Category"])
+def new_endpoint(data: InputModel):
+    # Your logic here
+    return {"result": "success"}
+```
 
-## Tech Stack
+### Run Tests (Future)
 
-### Frontend
-- **Expo** (React Native)
-- TypeScript
-- React Native Paper
-- Expo Router
-- Axios
-
-### Backend
-- **LoopBack 4** (Node.js)
-- TypeScript
-- Firebase (Auth + Firestore)
-- OpenAPI 3.0
-
-### AI Backend (Future)
-- **FastAPI** (Python)
-- Scikit-learn
-- AWS SageMaker
-- TensorFlow
-
-## Quick Start
-
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- React Native CLI
-- Android Studio (for Android development)
-- Python 3.9+ (for AI backend, future)
-- Firebase account
-
-### Setup
-
-1. **Clone repository**
 ```bash
-git clone <repository-url>
-cd sayam-platform
+pytest
 ```
 
-2. **Run setup script**
+## Deployment
+
+### Docker (Future)
+
 ```bash
-# Mac/Linux
-chmod +x scripts/setup-project.sh
-./scripts/setup-project.sh
-
-# Windows
-scripts\setup-project.bat
+docker build -t sayam-ai .
+docker run -p 8000:8000 sayam-ai
 ```
 
-3. **Setup Frontend**
-```bash
-cd frontend
-npx react-native init SayamApp --template react-native-template-typescript
-# Move files to current directory
-npm install
-```
+### AWS Lambda (Future)
 
-4. **Setup Backend**
-```bash
-cd backend
-npm init -y
-npm install express cors dotenv firebase-admin
-npm install --save-dev typescript @types/node @types/express ts-node nodemon
-```
+Use Mangum adapter for serverless deployment.
 
-5. **Setup Firebase**
-- Create project at [Firebase Console](https://console.firebase.google.com)
-- Enable Authentication (Phone)
-- Create Firestore database
-- Download service account key
-- Add credentials to `.env` files
+## Notes
 
-6. **Configure Environment Variables**
-```bash
-# Copy example files
-cp frontend/.env.example frontend/.env
-cp backend/.env.example backend/.env
-
-# Edit with your Firebase credentials
-```
-
-7. **Start Development**
-```bash
-# Terminal 1: Start backend
-cd backend
-npm run dev
-
-# Terminal 2: Start frontend
-cd frontend
-npm start
-npm run android
-```
-
-## Documentation
-
-- [Requirements](docs/mvp-requirements.md) - MVP requirements
-- [Design](docs/mvp-design.md) - MVP technical design
-- [Figma Specs](docs/figma-design-prompt.md) - UI design specifications
-- [Project Structure](PROJECT_STRUCTURE.md) - Folder organization
-- [API Documentation](docs/api/) - API endpoints (coming soon)
-
-## Development Workflow
-
-### Frontend Development (Expo)
-```bash
-cd frontend
-npx expo start      # Start dev server
-# Press 'a' for Android, 'i' for iOS
-npm test            # Run tests
-```
-
-### Backend Development (LoopBack 4)
-```bash
-cd backend
-npm start           # Start LB4 server
-npm run dev         # Start with auto-reload
-npm test            # Run tests
-```
-
-### AI Backend Development (FastAPI)
-```bash
-cd ai-backend
-source venv/bin/activate
-uvicorn src.api.main:app --reload
-pytest              # Run tests
-```
-
-## Team
-
-- **Frontend Developer** - React Native mobile app
-- **Backend Developer** - API server & business logic
-- **Designer** - UI/UX design
-- **Product Manager** - Requirements & user testing
-
-## Roadmap
-
-### MVP (Months 1-4)
-- [x] Project setup
-- [ ] Backend API development
-- [ ] Frontend UI development
-- [ ] Integration & testing
-- [ ] Play Store launch
-
-### v1.1 (Months 5-6)
-- [ ] iOS app
-- [ ] Store launch scenario
-- [ ] Basic ML forecasting
-- [ ] Decision tracking
-
-### v1.2 (Months 7-8)
-- [ ] Offline capability
-- [ ] 3 more regional languages
-- [ ] CSV import
-- [ ] Enhanced visualizations
-
-### v2.0 (Months 9-12)
-- [ ] Voice interface
-- [ ] Advanced ML models
-- [ ] Third-party integrations
-- [ ] Pattern recognition
-
-## Contributing
-
-1. Create feature branch: `git checkout -b feature/your-feature`
-2. Commit changes: `git commit -m 'feat(frontend): add feature'`
-3. Push to branch: `git push origin feature/your-feature`
-4. Create Pull Request
-
-### Commit Convention
-- `feat(scope)`: New feature
-- `fix(scope)`: Bug fix
-- `docs`: Documentation changes
-- `chore`: Maintenance tasks
-- `test`: Test changes
-
-## License
-
-Proprietary - All rights reserved
-
-## Contact
-
-- **Email**: support@sayam.app (placeholder)
-- **Website**: https://sayam.app (placeholder)
+- Currently using rule-based forecasting
+- ML models will be added in v1.1
+- Keep it simple for MVP!
 
 ---
 
-Built with ❤️ for Indian SMEs
+Built with ❤️ using FastAPI
